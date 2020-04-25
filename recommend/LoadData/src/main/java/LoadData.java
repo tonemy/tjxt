@@ -1,8 +1,10 @@
 
 import model.Shop;
+import model.ShopScore;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import util.MongoOutputFormat;
+import util.MongoOutputFormatScore;
 
 
 /**
@@ -69,6 +71,13 @@ public class LoadData {
                 .pojoType(Shop.class, "id", "title", "imgUrl", "categories", "tags");
         originData.print();
         originData.output(new MongoOutputFormat());
-        env.execute();
+
+        DataSet<ShopScore> originShopScore = env.readCsvFile("recommend/LoadData/src/main/resources/ratings.csv")
+                .fieldDelimiter(",")
+                .includeFields(true, true, true, true)
+                .pojoType(ShopScore.class, "id", "shopId", "score", "timestamp");
+        originShopScore.print();
+        originShopScore.output(new MongoOutputFormatScore());
+         env.execute();
     }
 }
